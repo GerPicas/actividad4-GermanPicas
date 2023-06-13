@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Lista de Productos en Tiempo Real</title>
+    </head>
+    <body>
+        <h1>Lista de Productos en Tiempo Real</h1>
+        <ul id="productList">
+            {{#each productos}}
+            <li>{{this}}</li>
+            {{/each}}
+        </ul>
+
+        <!-- Agregar un formulario para crear un nuevo producto -->
+        <form id="newProductForm">
+            <input type="text" id="productName"
+                placeholder="Nombre del producto">
+            <input type="submit" value="Agregar">
+        </form>
+
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+    const socket = io();
+
+    // Escuchar eventos desde el servidor
+    socket.on('productoCreado', (producto) => {
+      agregarProducto(producto);
+    });
+
+    socket.on('productoEliminado', (productoId) => {
+      eliminarProducto(productoId);
+    });
+
+    // Enviar el formulario cuando se crea un nuevo producto
+    const newProductForm = document.getElementById('newProductForm');
+    newProductForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const productName = document.getElementById('productName').value;
+      socket.emit('nuevoProducto', productName);
+      newProductForm.reset();
+    });
+
+    // Funciones para actualizar la lista de productos en la vista
+    function agregarProducto(producto) {
+      const productList = document.getElementById('productList');
+      const listItem = document.createElement('li');
+      listItem.textContent = producto;
+      productList.appendChild(listItem);
+    }
+
+    function eliminarProducto(productoId) {
+      const listItem = document.getElementById(productoId);
+      listItem.remove();
+    }
+  </script>
+    </body>
+</html>
